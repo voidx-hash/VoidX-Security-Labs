@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses - VoidX Security Labs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">VOIDX SECURITY LABS</div>
+        <nav class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="courses.html">Courses</a>
+            <a href="labs.html">Labs</a>
+            <a href="tools.html">Tools</a>
+            <a href="community.html">Community</a>
+            <a href="upgrade.html">Upgrade</a>
+            <div class="user-info auth-required">
+                <span class="user-email"></span> | 
+                <span class="user-role"></span> | 
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-title">COURSE CATALOG TERMINAL</div>
+            </div>
+            <div class="terminal-output" id="terminal-output">
+                <div><span class="terminal-text">Loading course catalog...</span></div>
+                <div><span class="terminal-text">Access level: <span id="access-level">FREE</span></span></div>
+                <div><span class="terminal-text">Type "help" for available commands.</span></div>
+                <br>
+            </div>
+            <div class="terminal-input">
+                <span class="terminal-prompt">user@voidx:~$</span>
+                <input type="text" class="terminal-input-field" placeholder="Type a command..." id="terminal-input">
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Cybersecurity Course Catalog</h2>
+            <div class="card-content">
+                <p>Browse our collection of cybersecurity courses. Access varies by subscription level.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Foundations</h2>
+            <div class="card-content">
+                <div class="course-list" id="foundations-courses">
+                    <!-- Foundations courses will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Ethical Hacking</h2>
+            <div class="card-content">
+                <div class="course-list" id="ethical-hacking-courses">
+                    <!-- Ethical Hacking courses will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Blue Team</h2>
+            <div class="card-content">
+                <div class="course-list" id="blue-team-courses">
+                    <!-- Blue Team courses will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Automation & AI</h2>
+            <div class="card-content">
+                <div class="course-list" id="automation-courses">
+                    <!-- Automation & AI courses will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="terms.html">Terms</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="ethics.html">Ethics</a>
+        </div>
+        <p>&copy; 2026 VoidX Security Labs. All content for educational and ethical purposes only.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Course functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update access level display
+            if (currentUser && currentUser.profile) {
+                document.getElementById('access-level').textContent = (currentUser.profile.role || 'FREE').toUpperCase();
+            }
+            
+            // Terminal functionality for courses page
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+            
+            terminalInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const command = terminalInput.value.trim().toLowerCase();
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">$ ${command}</span></div>`;
+                    
+                    switch(command) {
+                        case 'help':
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Available commands: help, back, dashboard, upgrade</span></div>`;
+                            break;
+                        case 'back':
+                            window.location.href = 'dashboard.html';
+                            break;
+                        case 'dashboard':
+                            window.location.href = 'dashboard.html';
+                            break;
+                        case 'upgrade':
+                            window.location.href = 'upgrade.html';
+                            break;
+                        case 'clear':
+                            terminalOutput.innerHTML = '';
+                            break;
+                        default:
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Command not found: ${command}. Type 'help' for available commands.</span></div>`;
+                    }
+                    
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    terminalInput.value = '';
+                }
+            });
+            
+            // Load courses based on user access
+            loadCourses();
+        });
+        
+        async function loadCourses() {
+            // Sample course data - in a real implementation, this would come from the database
+            const sampleCourses = [
+                {
+                    id: 1,
+                    title: "Introduction to Cybersecurity",
+                    level: "Foundations",
+                    access_level: "free",
+                    description: "Learn the basics of cybersecurity, threats, and protection methods.",
+                    modules: 5,
+                    duration: "8 hours",
+                    progress: 0
+                },
+                {
+                    id: 2,
+                    title: "Network Security Fundamentals",
+                    level: "Foundations",
+                    access_level: "free",
+                    description: "Understand network protocols, firewalls, and intrusion detection.",
+                    modules: 7,
+                    duration: "12 hours",
+                    progress: 0
+                },
+                {
+                    id: 3,
+                    title: "Penetration Testing Basics",
+                    level: "Ethical Hacking",
+                    access_level: "pro",
+                    description: "Learn the fundamentals of ethical hacking and penetration testing.",
+                    modules: 10,
+                    duration: "20 hours",
+                    progress: 0
+                },
+                {
+                    id: 4,
+                    title: "Advanced Penetration Testing",
+                    level: "Ethical Hacking",
+                    access_level: "elite",
+                    description: "Deep dive into advanced penetration testing techniques.",
+                    modules: 15,
+                    duration: "30 hours",
+                    progress: 0
+                },
+                {
+                    id: 5,
+                    title: "Incident Response",
+                    level: "Blue Team",
+                    access_level: "pro",
+                    description: "Learn how to respond to security incidents and breaches.",
+                    modules: 8,
+                    duration: "15 hours",
+                    progress: 0
+                },
+                {
+                    id: 6,
+                    title: "Threat Hunting",
+                    level: "Blue Team",
+                    access_level: "elite",
+                    description: "Proactively search for threats in your network infrastructure.",
+                    modules: 12,
+                    duration: "25 hours",
+                    progress: 0
+                },
+                {
+                    id: 7,
+                    title: "AI in Cybersecurity",
+                    level: "Automation & AI",
+                    access_level: "elite",
+                    description: "Use artificial intelligence for threat detection and response.",
+                    modules: 10,
+                    duration: "18 hours",
+                    progress: 0
+                }
+            ];
+            
+            // Group courses by level
+            const coursesByLevel = {
+                'Foundations': [],
+                'Ethical Hacking': [],
+                'Blue Team': [],
+                'Automation & AI': []
+            };
+            
+            sampleCourses.forEach(course => {
+                if (coursesByLevel[course.level]) {
+                    coursesByLevel[course.level].push(course);
+                }
+            });
+            
+            // Render courses for each level
+            Object.keys(coursesByLevel).forEach(level => {
+                const containerId = level.toLowerCase().replace(' & ', '-').replace(' ', '-') + '-courses';
+                const container = document.getElementById(containerId);
+                
+                if (container) {
+                    coursesByLevel[level].forEach(course => {
+                        const courseElement = createCourseElement(course);
+                        container.appendChild(courseElement);
+                    });
+                }
+            });
+        }
+        
+        function createCourseElement(course) {
+            const courseDiv = document.createElement('div');
+            courseDiv.className = 'course-item';
+            courseDiv.style.marginBottom = '1rem';
+            courseDiv.style.padding = '1rem';
+            courseDiv.style.border = '1px solid var(--border-color)';
+            courseDiv.style.borderRadius = '4px';
+            
+            // Check if user has access to this course
+            const hasAccess = hasCourseAccess(course.access_level);
+            const accessText = hasAccess ? 'Access Granted' : `Access Requires ${course.access_level.toUpperCase()} Subscription`;
+            const accessClass = hasAccess ? 'terminal-text' : 'terminal-text';
+            const buttonDisabled = hasAccess ? '' : 'disabled';
+            
+            courseDiv.innerHTML = `
+                <h3 style="color: var(--accent-primary); margin-bottom: 0.5rem;">${course.title}</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">${course.description}</p>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                    Modules: ${course.modules} | Duration: ${course.duration}
+                </p>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                    Access Level: <span class="${accessClass}">${accessText}</span>
+                </p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn" ${buttonDisabled} onclick="viewCourse(${course.id})">View Course</button>
+                    ${!hasAccess ? '<button class="btn" onclick="window.location.href=\'upgrade.html\'">Upgrade Access</button>' : ''}
+                </div>
+            `;
+            
+            return courseDiv;
+        }
+        
+        function hasCourseAccess(requiredLevel) {
+            if (!currentUser || !currentUser.profile) return false;
+            
+            const userRole = currentUser.profile.role || 'free';
+            const accessLevels = {
+                'free': ['free'],
+                'pro': ['free', 'pro'],
+                'elite': ['free', 'pro', 'elite']
+            };
+            
+            return accessLevels[userRole] && accessLevels[userRole].includes(requiredLevel);
+        }
+        
+        function viewCourse(courseId) {
+            window.location.href = `course-detail.html?id=${courseId}`;
+        }
+    </script>
+</body>
+</html>

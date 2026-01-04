@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community - VoidX Security Labs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">VOIDX SECURITY LABS</div>
+        <nav class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="courses.html">Courses</a>
+            <a href="labs.html">Labs</a>
+            <a href="tools.html">Tools</a>
+            <a href="community.html">Community</a>
+            <a href="upgrade.html">Upgrade</a>
+            <div class="user-info auth-required">
+                <span class="user-email"></span> | 
+                <span class="user-role"></span> | 
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-title">COMMUNITY FORUM TERMINAL</div>
+            </div>
+            <div class="terminal-output" id="terminal-output">
+                <div><span class="terminal-text">Loading community forum...</span></div>
+                <div><span class="terminal-text">Access level: <span id="access-level">FREE</span></span></div>
+                <div><span class="terminal-text">Type "help" for available commands.</span></div>
+                <br>
+            </div>
+            <div class="terminal-input">
+                <span class="terminal-prompt">user@voidx:~$</span>
+                <input type="text" class="terminal-input-field" placeholder="Type a command..." id="terminal-input">
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Community Forum</h2>
+            <div class="card-content">
+                <p>Connect with other cybersecurity professionals and learners.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div style="display: flex; margin-bottom: 1rem;">
+                    <input type="text" id="forum-search" class="form-input" placeholder="Search discussions..." style="flex: 1; margin-right: 0.5rem;">
+                    <button class="btn" onclick="searchDiscussions()">Search</button>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                    <button class="btn" onclick="showDiscussions('all')">All Discussions</button>
+                    <button class="btn" onclick="showDiscussions('popular')">Popular</button>
+                    <button class="btn" onclick="showDiscussions('recent')">Recent</button>
+                    <button class="btn" onclick="showNewPostForm()">New Post</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="new-post-form" style="display: none;">
+            <h2 class="card-title">Create New Discussion</h2>
+            <div class="card-content">
+                <div class="form-group">
+                    <label class="form-label" for="post-title">Title</label>
+                    <input type="text" id="post-title" class="form-input" placeholder="Enter discussion title">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="post-content">Content</label>
+                    <textarea id="post-content" class="form-input" rows="6" placeholder="Share your thoughts..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="post-category">Category</label>
+                    <select id="post-category" class="form-input">
+                        <option value="general">General Discussion</option>
+                        <option value="courses">Course Discussions</option>
+                        <option value="labs">Lab Questions</option>
+                        <option value="tools">Tool Discussions</option>
+                        <option value="career">Career Advice</option>
+                        <option value="news">Security News</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="createPost()">Post Discussion</button>
+                <button class="btn" onclick="hideNewPostForm()">Cancel</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Discussions</h2>
+            <div class="card-content">
+                <div id="discussions-list">
+                    <!-- Discussions will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="terms.html">Terms</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="ethics.html">Ethics</a>
+        </div>
+        <p>&copy; 2026 VoidX Security Labs. All content for educational and ethical purposes only.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Community functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update access level display
+            if (currentUser && currentUser.profile) {
+                document.getElementById('access-level').textContent = (currentUser.profile.role || 'FREE').toUpperCase();
+            }
+            
+            // Terminal functionality for community page
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+            
+            terminalInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const command = terminalInput.value.trim().toLowerCase();
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">$ ${command}</span></div>`;
+                    
+                    switch(command) {
+                        case 'help':
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Available commands: help, back, dashboard, post</span></div>`;
+                            break;
+                        case 'back':
+                            window.location.href = 'dashboard.html';
+                            break;
+                        case 'dashboard':
+                            window.location.href = 'dashboard.html';
+                            break;
+                        case 'post':
+                            showNewPostForm();
+                            break;
+                        case 'clear':
+                            terminalOutput.innerHTML = '';
+                            break;
+                        default:
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Command not found: ${command}. Type 'help' for available commands.</span></div>`;
+                    }
+                    
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    terminalInput.value = '';
+                }
+            });
+            
+            // Load initial discussions
+            loadDiscussions();
+        });
+        
+        // Sample discussions data
+        let discussions = [
+            {
+                id: 1,
+                title: "Best practices for network security",
+                content: "What are your recommendations for implementing network security in a small business environment?",
+                author: "cyber_ninja",
+                author_role: "pro",
+                category: "general",
+                created_at: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                replies: 12,
+                likes: 8,
+                tags: ["network", "best-practices"]
+            },
+            {
+                id: 2,
+                title: "Help with Buffer Overflow Lab",
+                content: "I'm stuck on the buffer overflow lab in the advanced section. Can someone point me in the right direction?",
+                author: "newbie_hacker",
+                author_role: "free",
+                category: "labs",
+                created_at: new Date(Date.now() - 2 * 60 * 60 * 1000),
+                replies: 5,
+                likes: 3,
+                tags: ["buffer-overflow", "help", "lab"]
+            },
+            {
+                id: 3,
+                title: "New CVE-2023-XXXX - Thoughts?",
+                content: "Just read about this new critical vulnerability. What are your thoughts on the impact?",
+                author: "vuln_hunter",
+                author_role: "elite",
+                category: "news",
+                created_at: new Date(Date.now() - 30 * 60 * 1000),
+                replies: 18,
+                likes: 15,
+                tags: ["cve", "vulnerability", "news"]
+            }
+        ];
+        
+        // Load discussions
+        function loadDiscussions(filter = 'recent') {
+            const discussionsList = document.getElementById('discussions-list');
+            discussionsList.innerHTML = '';
+            
+            // Sort discussions based on filter
+            let sortedDiscussions = [...discussions];
+            
+            if (filter === 'popular') {
+                sortedDiscussions.sort((a, b) => b.likes - a.likes);
+            } else if (filter === 'recent') {
+                sortedDiscussions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            }
+            
+            sortedDiscussions.forEach(discussion => {
+                const discussionElement = createDiscussionElement(discussion);
+                discussionsList.appendChild(discussionElement);
+            });
+        }
+        
+        // Create discussion element
+        function createDiscussionElement(discussion) {
+            const discussionDiv = document.createElement('div');
+            discussionDiv.className = 'discussion-item';
+            discussionDiv.style.borderBottom = '1px solid var(--border-color)';
+            discussionDiv.style.padding = '1rem 0';
+            
+            // Format date
+            const timeAgo = getTimeAgo(discussion.created_at);
+            
+            discussionDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <div>
+                        <h3 style="color: var(--accent-primary); margin-bottom: 0.25rem;">${discussion.title}</h3>
+                        <div style="display: flex; gap: 1rem; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                            <span>by <strong>${discussion.author}</strong> (${discussion.author_role})</span>
+                            <span>${timeAgo}</span>
+                            <span>Category: ${discussion.category}</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <span style="color: var(--text-secondary);">👍 ${discussion.likes}</span>
+                        <span style="color: var(--text-secondary);">💬 ${discussion.replies}</span>
+                    </div>
+                </div>
+                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">${discussion.content.substring(0, 200)}${discussion.content.length > 200 ? '...' : ''}</p>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <button class="btn" onclick="viewDiscussion(${discussion.id})">View Discussion</button>
+                    <button class="btn" onclick="likeDiscussion(${discussion.id})">Like</button>
+                    <button class="btn" onclick="replyToDiscussion(${discussion.id})">Reply</button>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    ${discussion.tags.map(tag => `<span style="background-color: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px; margin-right: 0.25rem; font-size: 0.8rem;">${tag}</span>`).join('')}
+                </div>
+            `;
+            
+            return discussionDiv;
+        }
+        
+        // Show discussions by filter
+        function showDiscussions(filter) {
+            loadDiscussions(filter);
+        }
+        
+        // Show new post form
+        function showNewPostForm() {
+            document.getElementById('new-post-form').style.display = 'block';
+            document.getElementById('new-post-form').scrollIntoView();
+        }
+        
+        // Hide new post form
+        function hideNewPostForm() {
+            document.getElementById('new-post-form').style.display = 'none';
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-content').value = '';
+        }
+        
+        // Create new post
+        function createPost() {
+            const title = document.getElementById('post-title').value;
+            const content = document.getElementById('post-content').value;
+            const category = document.getElementById('post-category').value;
+            
+            if (!title || !content) {
+                alert('Please fill in both title and content');
+                return;
+            }
+            
+            // Create new discussion
+            const newDiscussion = {
+                id: discussions.length + 1,
+                title: title,
+                content: content,
+                author: currentUser?.profile?.username || 'Anonymous',
+                author_role: currentUser?.profile?.role || 'free',
+                category: category,
+                created_at: new Date(),
+                replies: 0,
+                likes: 0,
+                tags: []
+            };
+            
+            discussions.unshift(newDiscussion);
+            hideNewPostForm();
+            loadDiscussions();
+            
+            alert('Discussion posted successfully!');
+        }
+        
+        // View discussion
+        function viewDiscussion(discussionId) {
+            alert(`Viewing discussion: ${discussionId} (Implementation pending)`);
+        }
+        
+        // Like discussion
+        function likeDiscussion(discussionId) {
+            const discussion = discussions.find(d => d.id === discussionId);
+            if (discussion) {
+                discussion.likes++;
+                loadDiscussions();
+            }
+        }
+        
+        // Reply to discussion
+        function replyToDiscussion(discussionId) {
+            alert(`Replying to discussion: ${discussionId} (Implementation pending)`);
+        }
+        
+        // Search discussions
+        function searchDiscussions() {
+            const searchTerm = document.getElementById('forum-search').value.toLowerCase();
+            
+            if (!searchTerm) {
+                loadDiscussions();
+                return;
+            }
+            
+            const filteredDiscussions = discussions.filter(discussion => 
+                discussion.title.toLowerCase().includes(searchTerm) || 
+                discussion.content.toLowerCase().includes(searchTerm) ||
+                discussion.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+            );
+            
+            const discussionsList = document.getElementById('discussions-list');
+            discussionsList.innerHTML = '';
+            
+            filteredDiscussions.forEach(discussion => {
+                const discussionElement = createDiscussionElement(discussion);
+                discussionsList.appendChild(discussionElement);
+            });
+        }
+        
+        // Helper function to calculate time ago
+        function getTimeAgo(date) {
+            const now = new Date();
+            const timeDiff = now - new Date(date);
+            const seconds = Math.floor(timeDiff / 1000);
+            
+            if (seconds < 60) {
+                return `${seconds} seconds ago`;
+            }
+            
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) {
+                return `${minutes} minutes ago`;
+            }
+            
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) {
+                return `${hours} hours ago`;
+            }
+            
+            const days = Math.floor(hours / 24);
+            return `${days} days ago`;
+        }
+    </script>
+</body>
+</html>

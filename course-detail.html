@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Detail - VoidX Security Labs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">VOIDX SECURITY LABS</div>
+        <nav class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="courses.html">Courses</a>
+            <a href="labs.html">Labs</a>
+            <a href="tools.html">Tools</a>
+            <a href="community.html">Community</a>
+            <a href="upgrade.html">Upgrade</a>
+            <div class="user-info auth-required">
+                <span class="user-email"></span> | 
+                <span class="user-role"></span> | 
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-title">COURSE DETAIL TERMINAL</div>
+            </div>
+            <div class="terminal-output" id="terminal-output">
+                <div><span class="terminal-text">Loading course details...</span></div>
+                <div><span class="terminal-text">Access level: <span id="access-level">FREE</span></span></div>
+                <div><span class="terminal-text">Type "help" for available commands.</span></div>
+                <br>
+            </div>
+            <div class="terminal-input">
+                <span class="terminal-prompt">user@voidx:~$</span>
+                <input type="text" class="terminal-input-field" placeholder="Type a command..." id="terminal-input">
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title" id="course-title">Course Title</h2>
+            <div class="card-content">
+                <p id="course-description">Course description will appear here.</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0;">
+                    <div><strong>Modules:</strong> <span id="course-modules">0</span></div>
+                    <div><strong>Duration:</strong> <span id="course-duration">0 hours</span></div>
+                    <div><strong>Level:</strong> <span id="course-level">N/A</span></div>
+                    <div><strong>Progress:</strong> <span id="course-progress">0%</span></div>
+                </div>
+                <button class="btn" id="start-course-btn" style="display: none;">Start Course</button>
+                <button class="btn" id="upgrade-btn" style="display: none;">Upgrade Access</button>
+            </div>
+        </div>
+
+        <div class="card" id="modules-section" style="display: none;">
+            <h2 class="card-title">Course Modules</h2>
+            <div class="card-content">
+                <div id="modules-list">
+                    <!-- Modules will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="terms.html">Terms</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="ethics.html">Ethics</a>
+        </div>
+        <p>&copy; 2026 VoidX Security Labs. All content for educational and ethical purposes only.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Course detail functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update access level display
+            if (currentUser && currentUser.profile) {
+                document.getElementById('access-level').textContent = (currentUser.profile.role || 'FREE').toUpperCase();
+            }
+            
+            // Terminal functionality for course detail page
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+            
+            terminalInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const command = terminalInput.value.trim().toLowerCase();
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">$ ${command}</span></div>`;
+                    
+                    switch(command) {
+                        case 'help':
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Available commands: help, back, courses, dashboard</span></div>`;
+                            break;
+                        case 'back':
+                        case 'courses':
+                            window.location.href = 'courses.html';
+                            break;
+                        case 'dashboard':
+                            window.location.href = 'dashboard.html';
+                            break;
+                        case 'clear':
+                            terminalOutput.innerHTML = '';
+                            break;
+                        default:
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Command not found: ${command}. Type 'help' for available commands.</span></div>`;
+                    }
+                    
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    terminalInput.value = '';
+                }
+            });
+            
+            // Load course details
+            loadCourseDetails();
+        });
+        
+        async function loadCourseDetails() {
+            // Get course ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const courseId = urlParams.get('id');
+            
+            if (!courseId) {
+                document.getElementById('terminal-output').innerHTML += `<div><span class="terminal-text">Error: No course ID provided.</span></div>`;
+                return;
+            }
+            
+            // Sample course data - in a real implementation, this would come from the database
+            const sampleCourses = [
+                {
+                    id: 1,
+                    title: "Introduction to Cybersecurity",
+                    level: "Foundations",
+                    access_level: "free",
+                    description: "Learn the basics of cybersecurity, threats, and protection methods.",
+                    modules: 5,
+                    duration: "8 hours",
+                    progress: 0,
+                    modules_list: [
+                        { id: 1, title: "Introduction to Cybersecurity", duration: "1 hour", completed: false },
+                        { id: 2, title: "Common Threats and Vulnerabilities", duration: "2 hours", completed: false },
+                        { id: 3, title: "Security Best Practices", duration: "2 hours", completed: false },
+                        { id: 4, title: "Authentication and Authorization", duration: "2 hours", completed: false },
+                        { id: 5, title: "Final Assessment", duration: "1 hour", completed: false }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "Network Security Fundamentals",
+                    level: "Foundations",
+                    access_level: "free",
+                    description: "Understand network protocols, firewalls, and intrusion detection.",
+                    modules: 7,
+                    duration: "12 hours",
+                    progress: 0,
+                    modules_list: [
+                        { id: 1, title: "Network Protocols Overview", duration: "2 hours", completed: false },
+                        { id: 2, title: "Firewalls and Network Segmentation", duration: "2 hours", completed: false },
+                        { id: 3, title: "Intrusion Detection Systems", duration: "2 hours", completed: false },
+                        { id: 4, title: "VPN and Secure Communications", duration: "2 hours", completed: false },
+                        { id: 5, title: "Network Monitoring", duration: "2 hours", completed: false },
+                        { id: 6, title: "Incident Response on Networks", duration: "1 hour", completed: false },
+                        { id: 7, title: "Final Assessment", duration: "1 hour", completed: false }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: "Penetration Testing Basics",
+                    level: "Ethical Hacking",
+                    access_level: "pro",
+                    description: "Learn the fundamentals of ethical hacking and penetration testing.",
+                    modules: 10,
+                    duration: "20 hours",
+                    progress: 0,
+                    modules_list: [
+                        { id: 1, title: "Introduction to Penetration Testing", duration: "2 hours", completed: false },
+                        { id: 2, title: "Information Gathering", duration: "3 hours", completed: false },
+                        { id: 3, title: "Vulnerability Assessment", duration: "3 hours", completed: false },
+                        { id: 4, title: "Exploitation Techniques", duration: "4 hours", completed: false },
+                        { id: 5, title: "Post-Exploitation", duration: "3 hours", completed: false },
+                        { id: 6, title: "Reporting", duration: "2 hours", completed: false },
+                        { id: 7, title: "Legal and Ethical Considerations", duration: "2 hours", completed: false },
+                        { id: 8, title: "Practical Exercise 1", duration: "1 hour", completed: false },
+                        { id: 9, title: "Practical Exercise 2", duration: "1 hour", completed: false },
+                        { id: 10, title: "Final Assessment", duration: "1 hour", completed: false }
+                    ]
+                }
+            ];
+            
+            // Find the course
+            const course = sampleCourses.find(c => c.id == courseId);
+            
+            if (!course) {
+                document.getElementById('terminal-output').innerHTML += `<div><span class="terminal-text">Error: Course not found.</span></div>`;
+                return;
+            }
+            
+            // Check if user has access to this course
+            const hasAccess = hasCourseAccess(course.access_level);
+            
+            // Update course details
+            document.getElementById('course-title').textContent = course.title;
+            document.getElementById('course-description').textContent = course.description;
+            document.getElementById('course-modules').textContent = course.modules;
+            document.getElementById('course-duration').textContent = course.duration;
+            document.getElementById('course-level').textContent = course.level;
+            document.getElementById('course-progress').textContent = course.progress + '%';
+            
+            // Show/hide buttons based on access
+            if (hasAccess) {
+                document.getElementById('start-course-btn').style.display = 'inline-block';
+                document.getElementById('start-course-btn').onclick = () => startCourse(course);
+            } else {
+                document.getElementById('upgrade-btn').style.display = 'inline-block';
+                document.getElementById('upgrade-btn').onclick = () => window.location.href = 'upgrade.html';
+            }
+            
+            // Load modules if user has access
+            if (hasAccess) {
+                document.getElementById('modules-section').style.display = 'block';
+                loadModules(course.modules_list);
+            }
+        }
+        
+        function hasCourseAccess(requiredLevel) {
+            if (!currentUser || !currentUser.profile) return false;
+            
+            const userRole = currentUser.profile.role || 'free';
+            const accessLevels = {
+                'free': ['free'],
+                'pro': ['free', 'pro'],
+                'elite': ['free', 'pro', 'elite']
+            };
+            
+            return accessLevels[userRole] && accessLevels[userRole].includes(requiredLevel);
+        }
+        
+        function startCourse(course) {
+            // In a real implementation, this would start the course
+            alert(`Starting course: ${course.title}`);
+        }
+        
+        function loadModules(modules) {
+            const modulesList = document.getElementById('modules-list');
+            modulesList.innerHTML = '';
+            
+            modules.forEach(module => {
+                const moduleDiv = document.createElement('div');
+                moduleDiv.className = 'module-item';
+                moduleDiv.style.marginBottom = '0.5rem';
+                moduleDiv.style.padding = '0.75rem';
+                moduleDiv.style.border = '1px solid var(--border-color)';
+                moduleDiv.style.borderRadius = '4px';
+                moduleDiv.style.display = 'flex';
+                moduleDiv.style.justifyContent = 'space-between';
+                moduleDiv.style.alignItems = 'center';
+                
+                moduleDiv.innerHTML = `
+                    <div>
+                        <strong>${module.id}. ${module.title}</strong>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary);">${module.duration}</div>
+                    </div>
+                    <div>
+                        ${module.completed ? 
+                            '<span style="color: var(--terminal-green);">✓ Completed</span>' : 
+                            '<button class="btn" onclick="startModule(' + module.id + ')">Start</button>'
+                        }
+                    </div>
+                `;
+                
+                modulesList.appendChild(moduleDiv);
+            });
+        }
+        
+        function startModule(moduleId) {
+            // In a real implementation, this would start the specific module
+            alert(`Starting module: ${moduleId}`);
+        }
+    </script>
+</body>
+</html>

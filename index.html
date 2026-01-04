@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoidX Security Labs - Cybersecurity Training Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">VOIDX SECURITY LABS</div>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="register.html">Register</a>
+            <a href="courses.html">Courses</a>
+            <a href="labs.html">Labs</a>
+            <a href="tools.html">Tools</a>
+            <a href="community.html">Community</a>
+            <div class="user-info guest-only">
+                <a href="register.html">Sign Up</a>
+            </div>
+            <div class="user-info auth-required">
+                <span class="user-email"></span> | 
+                <span class="user-role"></span> | 
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-title">SYSTEM ACCESS TERMINAL</div>
+            </div>
+            <div class="terminal-output" id="terminal-output">
+                <div><span class="terminal-text">Initializing VoidX Security Labs...</span></div>
+                <div><span class="terminal-text">System ready. Please authenticate.</span></div>
+                <div><span class="terminal-text">Type "help" for available commands.</span></div>
+                <br>
+                <div><span class="terminal-text">Welcome to VoidX Security Labs</span></div>
+                <div><span class="terminal-text">The premier cybersecurity training platform</span></div>
+                <br>
+                <div><span class="terminal-text">For educational and ethical purposes only</span></div>
+            </div>
+            <div class="terminal-input">
+                <span class="terminal-prompt">guest@voidx:~$</span>
+                <input type="text" class="terminal-input-field" placeholder="Type a command..." id="terminal-input">
+            </div>
+        </div>
+
+        <div class="card auth-required" style="display: none;">
+            <h2 class="card-title">Dashboard Access</h2>
+            <div class="card-content">
+                <p>Welcome back! Your session is active.</p>
+                <a href="dashboard.html" class="btn">Go to Dashboard</a>
+            </div>
+        </div>
+
+        <div class="card guest-only">
+            <h2 class="card-title">Login to VoidX Security Labs</h2>
+            <div class="card-content">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" id="email" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn">Login</button>
+                </form>
+                <p>Don't have an account? <a href="register.html">Register here</a></p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="terms.html">Terms</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="ethics.html">Ethics</a>
+        </div>
+        <p>&copy; 2026 VoidX Security Labs. All content for educational and ethical purposes only.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Terminal functionality for login page
+        document.addEventListener('DOMContentLoaded', function() {
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+            
+            // Add basic terminal commands
+            terminalInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const command = terminalInput.value.trim().toLowerCase();
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">$ ${command}</span></div>`;
+                    
+                    switch(command) {
+                        case 'help':
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Available commands: help, login, register</span></div>`;
+                            break;
+                        case 'login':
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Use the form above to login</span></div>`;
+                            break;
+                        case 'register':
+                            window.location.href = 'register.html';
+                            break;
+                        case 'clear':
+                            terminalOutput.innerHTML = '';
+                            break;
+                        default:
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Command not found: ${command}. Type 'help' for available commands.</span></div>`;
+                    }
+                    
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    terminalInput.value = '';
+                }
+            });
+            
+            // Handle login form submission
+            document.getElementById('login-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                try {
+                    await login(email, password);
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">Authentication successful. Redirecting to dashboard...</span></div>`;
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } catch (error) {
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">Login failed: ${error.message}</span></div>`;
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

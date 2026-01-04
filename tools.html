@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tools - VoidX Security Labs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">VOIDX SECURITY LABS</div>
+        <nav class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="courses.html">Courses</a>
+            <a href="labs.html">Labs</a>
+            <a href="tools.html">Tools</a>
+            <a href="community.html">Community</a>
+            <a href="upgrade.html">Upgrade</a>
+            <div class="user-info auth-required">
+                <span class="user-email"></span> | 
+                <span class="user-role"></span> | 
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-title">SECURITY TOOLS TERMINAL</div>
+            </div>
+            <div class="terminal-output" id="terminal-output">
+                <div><span class="terminal-text">Loading security tools...</span></div>
+                <div><span class="terminal-text">Access level: <span id="access-level">FREE</span></span></div>
+                <div><span class="terminal-text">Type "help" for available commands.</span></div>
+                <br>
+            </div>
+            <div class="terminal-input">
+                <span class="terminal-prompt">user@voidx:~$</span>
+                <input type="text" class="terminal-input-field" placeholder="Type a command..." id="terminal-input">
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Security Tools</h2>
+            <div class="card-content">
+                <p>Collection of cybersecurity tools. Access varies by subscription level.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Free Tools</h2>
+            <div class="card-content">
+                <div class="tool-list" id="free-tools">
+                    <!-- Free tools will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Pro Tools</h2>
+            <div class="card-content">
+                <div class="tool-list" id="pro-tools">
+                    <!-- Pro tools will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Elite Tools</h2>
+            <div class="card-content">
+                <div class="tool-list" id="elite-tools">
+                    <!-- Elite tools will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="terms.html">Terms</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="ethics.html">Ethics</a>
+        </div>
+        <p>&copy; 2026 VoidX Security Labs. All content for educational and ethical purposes only.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Tools functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update access level display
+            if (currentUser && currentUser.profile) {
+                document.getElementById('access-level').textContent = (currentUser.profile.role || 'FREE').toUpperCase();
+            }
+            
+            // Terminal functionality for tools page
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+            
+            terminalInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const command = terminalInput.value.trim().toLowerCase();
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">$ ${command}</span></div>`;
+                    
+                    switch(command) {
+                        case 'help':
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Available commands: help, back, dashboard, upgrade</span></div>`;
+                            break;
+                        case 'back':
+                            window.location.href = 'dashboard.html';
+                            break;
+                        case 'dashboard':
+                            window.location.href = 'dashboard.html';
+                            break;
+                        case 'upgrade':
+                            window.location.href = 'upgrade.html';
+                            break;
+                        case 'clear':
+                            terminalOutput.innerHTML = '';
+                            break;
+                        default:
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Command not found: ${command}. Type 'help' for available commands.</span></div>`;
+                    }
+                    
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    terminalInput.value = '';
+                }
+            });
+            
+            // Load tools based on user access
+            loadTools();
+        });
+        
+        async function loadTools() {
+            // Sample tool data - in a real implementation, this would come from the database
+            const sampleTools = [
+                {
+                    id: 1,
+                    name: "Nmap Scanner",
+                    category: "Network",
+                    access_level: "free",
+                    description: "Network discovery and security auditing tool.",
+                    url: "#"
+                },
+                {
+                    id: 2,
+                    name: "Wireshark",
+                    category: "Network",
+                    access_level: "free",
+                    description: "Network protocol analyzer for packet inspection.",
+                    url: "#"
+                },
+                {
+                    id: 3,
+                    name: "Burp Suite Community",
+                    category: "Web",
+                    access_level: "free",
+                    description: "Web application security testing toolkit.",
+                    url: "#"
+                },
+                {
+                    id: 4,
+                    name: "Metasploit Framework",
+                    category: "Exploitation",
+                    access_level: "pro",
+                    description: "Penetration testing framework with exploits.",
+                    url: "#"
+                },
+                {
+                    id: 5,
+                    name: "Nessus",
+                    category: "Vulnerability",
+                    access_level: "pro",
+                    description: "Vulnerability scanner for comprehensive assessments.",
+                    url: "#"
+                },
+                {
+                    id: 6,
+                    name: "Cobalt Strike",
+                    category: "Exploitation",
+                    access_level: "elite",
+                    description: "Adversary simulation and red team operations.",
+                    url: "#"
+                },
+                {
+                    id: 7,
+                    name: "Splunk Security",
+                    category: "Monitoring",
+                    access_level: "elite",
+                    description: "Security information and event management (SIEM).",
+                    url: "#"
+                },
+                {
+                    id: 8,
+                    name: "Hashcat",
+                    category: "Cracking",
+                    access_level: "pro",
+                    description: "Advanced password recovery and cracking tool.",
+                    url: "#"
+                }
+            ];
+            
+            // Group tools by access level
+            const toolsByAccess = {
+                'free': [],
+                'pro': [],
+                'elite': []
+            };
+            
+            sampleTools.forEach(tool => {
+                if (toolsByAccess[tool.access_level]) {
+                    toolsByAccess[tool.access_level].push(tool);
+                }
+            });
+            
+            // Render tools for each access level
+            Object.keys(toolsByAccess).forEach(accessLevel => {
+                const containerId = accessLevel + '-tools';
+                const container = document.getElementById(containerId);
+                
+                if (container) {
+                    toolsByAccess[accessLevel].forEach(tool => {
+                        const toolElement = createToolElement(tool);
+                        container.appendChild(toolElement);
+                    });
+                }
+            });
+        }
+        
+        function createToolElement(tool) {
+            const toolDiv = document.createElement('div');
+            toolDiv.className = 'tool-item';
+            toolDiv.style.marginBottom = '1rem';
+            toolDiv.style.padding = '1rem';
+            toolDiv.style.border = '1px solid var(--border-color)';
+            toolDiv.style.borderRadius = '4px';
+            
+            // Check if user has access to this tool
+            const hasAccess = hasToolAccess(tool.access_level);
+            const accessText = hasAccess ? 'Access Granted' : `Access Requires ${tool.access_level.toUpperCase()} Subscription`;
+            const accessClass = hasAccess ? 'terminal-text' : 'terminal-text';
+            const buttonDisabled = hasAccess ? '' : 'disabled';
+            
+            toolDiv.innerHTML = `
+                <h3 style="color: var(--accent-primary); margin-bottom: 0.5rem;">${tool.name}</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">${tool.description}</p>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                    Category: ${tool.category}
+                </p>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                    Access Level: <span class="${accessClass}">${accessText}</span>
+                </p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn" ${buttonDisabled} onclick="accessTool(${tool.id})">Access Tool</button>
+                    ${!hasAccess ? '<button class="btn" onclick="window.location.href=\'upgrade.html\'">Upgrade Access</button>' : ''}
+                </div>
+            `;
+            
+            return toolDiv;
+        }
+        
+        function hasToolAccess(requiredLevel) {
+            if (!currentUser || !currentUser.profile) return false;
+            
+            const userRole = currentUser.profile.role || 'free';
+            const accessLevels = {
+                'free': ['free'],
+                'pro': ['free', 'pro'],
+                'elite': ['free', 'pro', 'elite']
+            };
+            
+            return accessLevels[userRole] && accessLevels[userRole].includes(requiredLevel);
+        }
+        
+        function accessTool(toolId) {
+            // In a real implementation, this would connect to the actual tool
+            alert(`Accessing tool: ${toolId}. In a real implementation, this would connect to the actual security tool.`);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - VoidX Security Labs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">VOIDX SECURITY LABS</div>
+        <nav class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="courses.html">Courses</a>
+            <a href="labs.html">Labs</a>
+            <a href="tools.html">Tools</a>
+            <a href="community.html">Community</a>
+            <a href="admin.html">Admin</a>
+            <div class="user-info auth-required">
+                <span class="user-email"></span> | 
+                <span class="user-role"></span> | 
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-title">ADMINISTRATION TERMINAL</div>
+            </div>
+            <div class="terminal-output" id="terminal-output">
+                <div><span class="terminal-text">Loading administration panel...</span></div>
+                <div><span class="terminal-text">Access level: <span id="access-level">ADMIN</span></span></div>
+                <div><span class="terminal-text">Type "help" for available commands.</span></div>
+                <br>
+            </div>
+            <div class="terminal-input">
+                <span class="terminal-prompt">admin@voidx:~$</span>
+                <input type="text" class="terminal-input-field" placeholder="Type a command..." id="terminal-input">
+            </div>
+        </div>
+
+        <div class="card" id="admin-access" style="display: none;">
+            <h2 class="card-title">Admin Dashboard</h2>
+            <div class="card-content">
+                <p>Administrative tools for managing users, courses, and subscriptions.</p>
+            </div>
+        </div>
+
+        <div class="card" id="admin-warning" style="display: block;">
+            <h2 class="card-title">Access Denied</h2>
+            <div class="card-content">
+                <p>You do not have admin privileges to access this panel.</p>
+            </div>
+        </div>
+
+        <div class="card" id="users-section" style="display: none;">
+            <h2 class="card-title">User Management</h2>
+            <div class="card-content">
+                <div style="margin-bottom: 1rem;">
+                    <input type="text" id="user-search" class="form-input" placeholder="Search users...">
+                    <button class="btn" onclick="searchUsers()">Search</button>
+                </div>
+                <div id="users-table-container">
+                    <table id="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Users will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="courses-section" style="display: none;">
+            <h2 class="card-title">Course Management</h2>
+            <div class="card-content">
+                <div style="margin-bottom: 1rem;">
+                    <button class="btn" onclick="showAddCourseForm()">Add Course</button>
+                </div>
+                <div id="courses-table-container">
+                    <table id="courses-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Level</th>
+                                <th>Access Level</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courses-table-body">
+                            <!-- Courses will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="subscriptions-section" style="display: none;">
+            <h2 class="card-title">Subscription Management</h2>
+            <div class="card-content">
+                <div id="subscriptions-table-container">
+                    <table id="subscriptions-table">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Plan</th>
+                                <th>Status</th>
+                                <th>Expires At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subscriptions-table-body">
+                            <!-- Subscriptions will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Course Form (hidden by default) -->
+        <div class="card" id="add-course-form" style="display: none;">
+            <h2 class="card-title">Add New Course</h2>
+            <div class="card-content">
+                <div class="form-group">
+                    <label class="form-label" for="course-title">Course Title</label>
+                    <input type="text" id="course-title" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="course-level">Level</label>
+                    <select id="course-level" class="form-input">
+                        <option value="Foundations">Foundations</option>
+                        <option value="Ethical Hacking">Ethical Hacking</option>
+                        <option value="Blue Team">Blue Team</option>
+                        <option value="Automation & AI">Automation & AI</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="course-access-level">Access Level</label>
+                    <select id="course-access-level" class="form-input">
+                        <option value="free">Free</option>
+                        <option value="pro">Pro</option>
+                        <option value="elite">Elite</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="course-description">Description</label>
+                    <textarea id="course-description" class="form-input" rows="4"></textarea>
+                </div>
+                <button class="btn" onclick="addCourse()">Add Course</button>
+                <button class="btn" onclick="hideAddCourseForm()">Cancel</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="terms.html">Terms</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="ethics.html">Ethics</a>
+        </div>
+        <p>&copy; 2026 VoidX Security Labs. All content for educational and ethical purposes only.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Admin functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user has admin access
+            if (currentUser && currentUser.profile && currentUser.profile.role === 'admin') {
+                document.getElementById('admin-access').style.display = 'block';
+                document.getElementById('admin-warning').style.display = 'none';
+                document.getElementById('users-section').style.display = 'block';
+                document.getElementById('courses-section').style.display = 'block';
+                document.getElementById('subscriptions-section').style.display = 'block';
+                
+                // Update access level display
+                document.getElementById('access-level').textContent = 'ADMIN';
+                
+                // Load initial data
+                loadUsers();
+                loadCourses();
+                loadSubscriptions();
+            } else {
+                // Non-admins see access denied message
+                document.getElementById('access-level').textContent = (currentUser?.profile?.role || 'GUEST').toUpperCase();
+            }
+            
+            // Terminal functionality for admin page
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+            
+            terminalInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const command = terminalInput.value.trim().toLowerCase();
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">$ ${command}</span></div>`;
+                    
+                    switch(command) {
+                        case 'help':
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Available commands: help, users, courses, subscriptions, dashboard</span></div>`;
+                            break;
+                        case 'users':
+                            if (currentUser && currentUser.profile && currentUser.profile.role === 'admin') {
+                                document.getElementById('users-section').scrollIntoView();
+                            } else {
+                                terminalOutput.innerHTML += `<div><span class="terminal-text">Access denied. Admin privileges required.</span></div>`;
+                            }
+                            break;
+                        case 'courses':
+                            if (currentUser && currentUser.profile && currentUser.profile.role === 'admin') {
+                                document.getElementById('courses-section').scrollIntoView();
+                            } else {
+                                terminalOutput.innerHTML += `<div><span class="terminal-text">Access denied. Admin privileges required.</span></div>`;
+                            }
+                            break;
+                        case 'subscriptions':
+                            if (currentUser && currentUser.profile && currentUser.profile.role === 'admin') {
+                                document.getElementById('subscriptions-section').scrollIntoView();
+                            } else {
+                                terminalOutput.innerHTML += `<div><span class="terminal-text">Access denied. Admin privileges required.</span></div>`;
+                            }
+                            break;
+                        case 'dashboard':
+                            window.location.href = 'dashboard.html';
+                            break;
+                        case 'clear':
+                            terminalOutput.innerHTML = '';
+                            break;
+                        default:
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Command not found: ${command}. Type 'help' for available commands.</span></div>`;
+                    }
+                    
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    terminalInput.value = '';
+                }
+            });
+        });
+        
+        // Load users
+        async function loadUsers() {
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('Error loading users:', error);
+                    return;
+                }
+                
+                const tbody = document.getElementById('users-table-body');
+                tbody.innerHTML = '';
+                
+                data.forEach(user => {
+                    const row = document.createElement('tr');
+                    
+                    // Determine role options based on current role
+                    const roleOptions = ['guest', 'free', 'pro', 'elite', 'admin']
+                        .map(role => `<option value="${role}" ${user.role === role ? 'selected' : ''}>${role}</option>`)
+                        .join('');
+                    
+                    row.innerHTML = `
+                        <td>${user.id.substring(0, 8)}...</td>
+                        <td>${user.email}</td>
+                        <td>${user.username}</td>
+                        <td>
+                            <select class="form-input" onchange="updateUserRole('${user.id}', this.value)" id="role-${user.id}">
+                                ${roleOptions}
+                            </select>
+                        </td>
+                        <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteUser('${user.id}')">Delete</button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+        
+        // Update user role
+        async function updateUserRole(userId, newRole) {
+            try {
+                const { error } = await supabase
+                    .from('users')
+                    .update({ role: newRole })
+                    .eq('id', userId);
+                
+                if (error) {
+                    console.error('Error updating user role:', error);
+                    alert('Error updating user role: ' + error.message);
+                    return;
+                }
+                
+                alert('User role updated successfully!');
+            } catch (error) {
+                console.error('Error updating user role:', error);
+                alert('Error updating user role: ' + error.message);
+            }
+        }
+        
+        // Delete user
+        async function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('users')
+                    .delete()
+                    .eq('id', userId);
+                
+                if (error) {
+                    console.error('Error deleting user:', error);
+                    alert('Error deleting user: ' + error.message);
+                    return;
+                }
+                
+                alert('User deleted successfully!');
+                loadUsers(); // Refresh the user list
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Error deleting user: ' + error.message);
+            }
+        }
+        
+        // Search users
+        async function searchUsers() {
+            const searchTerm = document.getElementById('user-search').value;
+            
+            try {
+                let query = supabase
+                    .from('users')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (searchTerm) {
+                    query = query.or(`email.ilike.%${searchTerm}%,username.ilike.%${searchTerm}%`);
+                }
+                
+                const { data, error } = await query;
+                
+                if (error) {
+                    console.error('Error searching users:', error);
+                    return;
+                }
+                
+                const tbody = document.getElementById('users-table-body');
+                tbody.innerHTML = '';
+                
+                data.forEach(user => {
+                    const row = document.createElement('tr');
+                    
+                    // Determine role options based on current role
+                    const roleOptions = ['guest', 'free', 'pro', 'elite', 'admin']
+                        .map(role => `<option value="${role}" ${user.role === role ? 'selected' : ''}>${role}</option>`)
+                        .join('');
+                    
+                    row.innerHTML = `
+                        <td>${user.id.substring(0, 8)}...</td>
+                        <td>${user.email}</td>
+                        <td>${user.username}</td>
+                        <td>
+                            <select class="form-input" onchange="updateUserRole('${user.id}', this.value)" id="role-${user.id}">
+                                ${roleOptions}
+                            </select>
+                        </td>
+                        <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteUser('${user.id}')">Delete</button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error searching users:', error);
+            }
+        }
+        
+        // Load courses
+        async function loadCourses() {
+            // Sample course data - in a real implementation, this would come from the database
+            const sampleCourses = [
+                {
+                    id: 1,
+                    title: "Introduction to Cybersecurity",
+                    level: "Foundations",
+                    access_level: "free",
+                    description: "Learn the basics of cybersecurity, threats, and protection methods."
+                },
+                {
+                    id: 2,
+                    title: "Network Security Fundamentals",
+                    level: "Foundations",
+                    access_level: "free",
+                    description: "Understand network protocols, firewalls, and intrusion detection."
+                },
+                {
+                    id: 3,
+                    title: "Penetration Testing Basics",
+                    level: "Ethical Hacking",
+                    access_level: "pro",
+                    description: "Learn the fundamentals of ethical hacking and penetration testing."
+                }
+            ];
+            
+            const tbody = document.getElementById('courses-table-body');
+            tbody.innerHTML = '';
+            
+            sampleCourses.forEach(course => {
+                const row = document.createElement('tr');
+                
+                // Determine access level options
+                const accessOptions = ['free', 'pro', 'elite']
+                    .map(level => `<option value="${level}" ${course.access_level === level ? 'selected' : ''}>${level}</option>`)
+                    .join('');
+                
+                row.innerHTML = `
+                    <td>${course.id}</td>
+                    <td>${course.title}</td>
+                    <td>${course.level}</td>
+                    <td>
+                        <select class="form-input" onchange="updateCourseAccessLevel(${course.id}, this.value)">
+                            ${accessOptions}
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn" onclick="editCourse(${course.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteCourse(${course.id})">Delete</button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Show add course form
+        function showAddCourseForm() {
+            document.getElementById('add-course-form').style.display = 'block';
+            document.getElementById('courses-section').scrollIntoView();
+        }
+        
+        // Hide add course form
+        function hideAddCourseForm() {
+            document.getElementById('add-course-form').style.display = 'none';
+            document.getElementById('course-title').value = '';
+            document.getElementById('course-description').value = '';
+        }
+        
+        // Add course
+        async function addCourse() {
+            const title = document.getElementById('course-title').value;
+            const level = document.getElementById('course-level').value;
+            const accessLevel = document.getElementById('course-access-level').value;
+            const description = document.getElementById('course-description').value;
+            
+            if (!title || !level || !accessLevel || !description) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // In a real implementation, this would add the course to the database
+            alert(`Course added successfully!\nTitle: ${title}\nLevel: ${level}\nAccess: ${accessLevel}`);
+            
+            // Reset form and hide it
+            hideAddCourseForm();
+            loadCourses(); // Refresh the course list
+        }
+        
+        // Update course access level
+        async function updateCourseAccessLevel(courseId, newAccessLevel) {
+            // In a real implementation, this would update the course in the database
+            alert(`Course ${courseId} access level updated to ${newAccessLevel}`);
+        }
+        
+        // Edit course
+        function editCourse(courseId) {
+            alert(`Editing course: ${courseId} (Implementation pending)`);
+        }
+        
+        // Delete course
+        async function deleteCourse(courseId) {
+            if (confirm(`Are you sure you want to delete course ${courseId}?`)) {
+                // In a real implementation, this would delete the course from the database
+                alert(`Course ${courseId} deleted successfully!`);
+                loadCourses(); // Refresh the course list
+            }
+        }
+        
+        // Load subscriptions
+        async function loadSubscriptions() {
+            // Sample subscription data - in a real implementation, this would come from the database
+            const sampleSubscriptions = [
+                {
+                    user_id: "user123",
+                    plan: "pro",
+                    status: "active",
+                    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                },
+                {
+                    user_id: "user456",
+                    plan: "elite",
+                    status: "active",
+                    expires_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString()
+                }
+            ];
+            
+            const tbody = document.getElementById('subscriptions-table-body');
+            tbody.innerHTML = '';
+            
+            sampleSubscriptions.forEach(sub => {
+                const row = document.createElement('tr');
+                
+                // Determine status options
+                const statusOptions = ['active', 'inactive', 'expired', 'cancelled']
+                    .map(status => `<option value="${status}" ${sub.status === status ? 'selected' : ''}>${status}</option>`)
+                    .join('');
+                
+                row.innerHTML = `
+                    <td>${sub.user_id.substring(0, 8)}...</td>
+                    <td>${sub.plan.toUpperCase()}</td>
+                    <td>
+                        <select class="form-input" onchange="updateSubscriptionStatus('${sub.user_id}', this.value)">
+                            ${statusOptions}
+                        </select>
+                    </td>
+                    <td>${new Date(sub.expires_at).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn" onclick="updateSubscription('${sub.user_id}')">Update</button>
+                        <button class="btn btn-danger" onclick="cancelSubscription('${sub.user_id}')">Cancel</button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Update subscription status
+        async function updateSubscriptionStatus(userId, newStatus) {
+            // In a real implementation, this would update the subscription in the database
+            alert(`Subscription for user ${userId} status updated to ${newStatus}`);
+        }
+        
+        // Update subscription
+        function updateSubscription(userId) {
+            alert(`Updating subscription for user: ${userId} (Implementation pending)`);
+        }
+        
+        // Cancel subscription
+        async function cancelSubscription(userId) {
+            if (confirm(`Are you sure you want to cancel the subscription for user ${userId}?`)) {
+                // In a real implementation, this would cancel the subscription in the database
+                alert(`Subscription for user ${userId} canceled successfully!`);
+                loadSubscriptions(); // Refresh the subscription list
+            }
+        }
+    </script>
+</body>
+</html>

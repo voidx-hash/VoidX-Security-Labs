@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labs - VoidX Security Labs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">VOIDX SECURITY LABS</div>
+        <nav class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="courses.html">Courses</a>
+            <a href="labs.html">Labs</a>
+            <a href="tools.html">Tools</a>
+            <a href="community.html">Community</a>
+            <a href="upgrade.html">Upgrade</a>
+            <div class="user-info auth-required">
+                <span class="user-email"></span> | 
+                <span class="user-role"></span> | 
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-title">SECURITY LABS TERMINAL</div>
+            </div>
+            <div class="terminal-output" id="terminal-output">
+                <div><span class="terminal-text">Loading security labs...</span></div>
+                <div><span class="terminal-text">Access level: <span id="access-level">FREE</span></span></div>
+                <div><span class="terminal-text">Type "help" for available commands.</span></div>
+                <br>
+                <div><span class="terminal-text" style="color: var(--accent-danger);">⚠️ WARNING: All labs are for educational and ethical purposes only</span></div>
+                <div><span class="terminal-text" style="color: var(--accent-danger);">Unauthorized testing on systems you don't own is illegal</span></div>
+            </div>
+            <div class="terminal-input">
+                <span class="terminal-prompt">user@voidx:~$</span>
+                <input type="text" class="terminal-input-field" placeholder="Type a command..." id="terminal-input">
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Security Labs</h2>
+            <div class="card-content">
+                <p>Hands-on security labs for practicing cybersecurity skills. Access varies by subscription level.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Ethical Warning</h2>
+            <div class="card-content">
+                <p style="color: var(--accent-danger);">⚠️ All labs are for educational and ethical purposes only. Never attempt these techniques on systems you do not own or have explicit permission to test.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Beginner Labs</h2>
+            <div class="card-content">
+                <div class="lab-list" id="beginner-labs">
+                    <!-- Beginner labs will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Intermediate Labs</h2>
+            <div class="card-content">
+                <div class="lab-list" id="intermediate-labs">
+                    <!-- Intermediate labs will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Advanced Labs</h2>
+            <div class="card-content">
+                <div class="lab-list" id="advanced-labs">
+                    <!-- Advanced labs will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Expert Labs</h2>
+            <div class="card-content">
+                <div class="lab-list" id="expert-labs">
+                    <!-- Expert labs will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="terms.html">Terms</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="ethics.html">Ethics</a>
+        </div>
+        <p>&copy; 2026 VoidX Security Labs. All content for educational and ethical purposes only.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Labs functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update access level display
+            if (currentUser && currentUser.profile) {
+                document.getElementById('access-level').textContent = (currentUser.profile.role || 'FREE').toUpperCase();
+            }
+            
+            // Terminal functionality for labs page
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+            
+            terminalInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const command = terminalInput.value.trim().toLowerCase();
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">$ ${command}</span></div>`;
+                    
+                    switch(command) {
+                        case 'help':
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Available commands: help, back, dashboard, upgrade</span></div>`;
+                            break;
+                        case 'back':
+                            window.location.href = 'dashboard.html';
+                            break;
+                        case 'dashboard':
+                            window.location.href = 'dashboard.html';
+                            break;
+                        case 'upgrade':
+                            window.location.href = 'upgrade.html';
+                            break;
+                        case 'clear':
+                            terminalOutput.innerHTML = '';
+                            break;
+                        default:
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Command not found: ${command}. Type 'help' for available commands.</span></div>`;
+                    }
+                    
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    terminalInput.value = '';
+                }
+            });
+            
+            // Load labs based on user access
+            loadLabs();
+        });
+        
+        async function loadLabs() {
+            // Sample lab data - in a real implementation, this would come from the database
+            const sampleLabs = [
+                {
+                    id: 1,
+                    title: "Vulnerable Web App Testing",
+                    difficulty: "Beginner",
+                    access_level: "free",
+                    description: "Practice testing a deliberately vulnerable web application.",
+                    estimated_time: "2 hours",
+                    prerequisites: "Basic web knowledge"
+                },
+                {
+                    id: 2,
+                    title: "Network Scanning Basics",
+                    difficulty: "Beginner",
+                    access_level: "free",
+                    description: "Learn to use nmap and other scanning tools.",
+                    estimated_time: "1.5 hours",
+                    prerequisites: "Basic networking knowledge"
+                },
+                {
+                    id: 3,
+                    title: "Password Cracking",
+                    difficulty: "Intermediate",
+                    access_level: "pro",
+                    description: "Practice password cracking techniques using hashcat and John.",
+                    estimated_time: "3 hours",
+                    prerequisites: "Basic Linux, hash concepts"
+                },
+                {
+                    id: 4,
+                    title: "Buffer Overflow Exploitation",
+                    difficulty: "Advanced",
+                    access_level: "elite",
+                    description: "Learn to develop exploits for buffer overflow vulnerabilities.",
+                    estimated_time: "6 hours",
+                    prerequisites: "Assembly, memory management"
+                },
+                {
+                    id: 5,
+                    title: "Advanced Persistent Threat Simulation",
+                    difficulty: "Expert",
+                    access_level: "elite",
+                    description: "Simulate an APT attack and practice detection/response.",
+                    estimated_time: "10 hours",
+                    prerequisites: "All previous skills"
+                },
+                {
+                    id: 6,
+                    title: "Mobile Application Security",
+                    difficulty: "Intermediate",
+                    access_level: "pro",
+                    description: "Analyze and test mobile applications for security issues.",
+                    estimated_time: "4 hours",
+                    prerequisites: "Web security knowledge"
+                }
+            ];
+            
+            // Group labs by difficulty
+            const labsByDifficulty = {
+                'Beginner': [],
+                'Intermediate': [],
+                'Advanced': [],
+                'Expert': []
+            };
+            
+            sampleLabs.forEach(lab => {
+                if (labsByDifficulty[lab.difficulty]) {
+                    labsByDifficulty[lab.difficulty].push(lab);
+                }
+            });
+            
+            // Render labs for each difficulty level
+            Object.keys(labsByDifficulty).forEach(difficulty => {
+                const containerId = difficulty.toLowerCase() + '-labs';
+                const container = document.getElementById(containerId);
+                
+                if (container) {
+                    labsByDifficulty[difficulty].forEach(lab => {
+                        const labElement = createLabElement(lab);
+                        container.appendChild(labElement);
+                    });
+                }
+            });
+        }
+        
+        function createLabElement(lab) {
+            const labDiv = document.createElement('div');
+            labDiv.className = 'lab-item';
+            labDiv.style.marginBottom = '1rem';
+            labDiv.style.padding = '1rem';
+            labDiv.style.border = '1px solid var(--border-color)';
+            labDiv.style.borderRadius = '4px';
+            
+            // Check if user has access to this lab
+            const hasAccess = hasLabAccess(lab.access_level);
+            const accessText = hasAccess ? 'Access Granted' : `Access Requires ${lab.access_level.toUpperCase()} Subscription`;
+            const accessClass = hasAccess ? 'terminal-text' : 'terminal-text';
+            const buttonDisabled = hasAccess ? '' : 'disabled';
+            
+            labDiv.innerHTML = `
+                <h3 style="color: var(--accent-primary); margin-bottom: 0.5rem;">${lab.title}</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">${lab.description}</p>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                    Estimated Time: ${lab.estimated_time} | Prerequisites: ${lab.prerequisites}
+                </p>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                    Access Level: <span class="${accessClass}">${accessText}</span>
+                </p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn" ${buttonDisabled} onclick="startLab(${lab.id})">Start Lab</button>
+                    ${!hasAccess ? '<button class="btn" onclick="window.location.href=\'upgrade.html\'">Upgrade Access</button>' : ''}
+                </div>
+            `;
+            
+            return labDiv;
+        }
+        
+        function hasLabAccess(requiredLevel) {
+            if (!currentUser || !currentUser.profile) return false;
+            
+            const userRole = currentUser.profile.role || 'free';
+            const accessLevels = {
+                'free': ['free'],
+                'pro': ['free', 'pro'],
+                'elite': ['free', 'pro', 'elite']
+            };
+            
+            return accessLevels[userRole] && accessLevels[userRole].includes(requiredLevel);
+        }
+        
+        function startLab(labId) {
+            // In a real implementation, this would start the lab environment
+            alert(`Starting lab: ${labId}. In a real implementation, this would connect to a lab environment.`);
+        }
+    </script>
+</body>
+</html>

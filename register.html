@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - VoidX Security Labs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">VOIDX SECURITY LABS</div>
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="register.html">Register</a>
+            <a href="courses.html">Courses</a>
+            <a href="labs.html">Labs</a>
+            <a href="tools.html">Tools</a>
+            <a href="community.html">Community</a>
+            <div class="user-info guest-only">
+                <a href="index.html">Login</a>
+            </div>
+            <div class="user-info auth-required">
+                <span class="user-email"></span> | 
+                <span class="user-role"></span> | 
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-title">USER REGISTRATION TERMINAL</div>
+            </div>
+            <div class="terminal-output" id="terminal-output">
+                <div><span class="terminal-text">Initializing registration system...</span></div>
+                <div><span class="terminal-text">Please provide your credentials.</span></div>
+                <br>
+                <div><span class="terminal-text">By registering, you agree to our terms of service</span></div>
+                <div><span class="terminal-text">and ethical use policy.</span></div>
+            </div>
+            <div class="terminal-input">
+                <span class="terminal-prompt">guest@voidx:~$</span>
+                <input type="text" class="terminal-input-field" placeholder="Type a command..." id="terminal-input">
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Create Your VoidX Account</h2>
+            <div class="card-content">
+                <form id="register-form">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" id="username" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" id="email" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <input type="password" id="password" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="confirm-password">Confirm Password</label>
+                        <input type="password" id="confirm-password" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn">Register</button>
+                </form>
+                <p>Already have an account? <a href="index.html">Login here</a></p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="terms.html">Terms</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="ethics.html">Ethics</a>
+        </div>
+        <p>&copy; 2026 VoidX Security Labs. All content for educational and ethical purposes only.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script>
+        // Terminal functionality for register page
+        document.addEventListener('DOMContentLoaded', function() {
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+            
+            // Add basic terminal commands
+            terminalInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const command = terminalInput.value.trim().toLowerCase();
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">$ ${command}</span></div>`;
+                    
+                    switch(command) {
+                        case 'help':
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Available commands: help, login, register</span></div>`;
+                            break;
+                        case 'login':
+                            window.location.href = 'index.html';
+                            break;
+                        case 'register':
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Fill out the form above to register</span></div>`;
+                            break;
+                        case 'clear':
+                            terminalOutput.innerHTML = '';
+                            break;
+                        default:
+                            terminalOutput.innerHTML += `<div><span class="terminal-text">Command not found: ${command}. Type 'help' for available commands.</span></div>`;
+                    }
+                    
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    terminalInput.value = '';
+                }
+            });
+            
+            // Handle registration form submission
+            document.getElementById('register-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                
+                if (password !== confirmPassword) {
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">Passwords do not match!</span></div>`;
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                    return;
+                }
+                
+                try {
+                    await register(email, password, username);
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">Registration successful! Redirecting to dashboard...</span></div>`;
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } catch (error) {
+                    terminalOutput.innerHTML += `<div><span class="terminal-text">Registration failed: ${error.message}</span></div>`;
+                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

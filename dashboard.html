@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - VoidX Security Labs</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">VOIDX SECURITY LABS</div>
+        <nav class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="courses.html">Courses</a>
+            <a href="labs.html">Labs</a>
+            <a href="tools.html">Tools</a>
+            <a href="community.html">Community</a>
+            <a href="upgrade.html">Upgrade</a>
+            <div class="user-info auth-required">
+                <span class="user-email"></span> | 
+                <span class="user-role"></span> | 
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-title">USER DASHBOARD TERMINAL</div>
+            </div>
+            <div class="terminal-output" id="terminal-output">
+                <div><span class="terminal-text">Loading user dashboard...</span></div>
+                <div><span class="terminal-text">System ready. Access granted.</span></div>
+                <div><span class="terminal-text">Type "help" for available commands.</span></div>
+                <br>
+            </div>
+            <div class="terminal-input">
+                <span class="terminal-prompt">user@voidx:~$</span>
+                <input type="text" class="terminal-input-field" placeholder="Type a command..." id="terminal-input">
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">User Dashboard</h2>
+            <div class="card-content">
+                <div id="user-info">
+                    <p><strong>Email:</strong> <span class="user-email"></span></p>
+                    <p><strong>Role:</strong> <span class="user-role"></span></p>
+                    <p><strong>Subscription Status:</strong> <span id="subscription-status">Free</span></p>
+                    <p><strong>Member Since:</strong> <span id="member-since"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Quick Access</h2>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <a href="courses.html" class="btn">Courses</a>
+                    <a href="labs.html" class="btn">Labs</a>
+                    <a href="tools.html" class="btn">Tools</a>
+                    <a href="upgrade.html" class="btn">Upgrade</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Recent Activity</h2>
+            <div class="card-content">
+                <p id="recent-activity">No recent activity</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="terms.html">Terms</a>
+            <a href="privacy.html">Privacy</a>
+            <a href="ethics.html">Ethics</a>
+        </div>
+        <p>&copy; 2026 VoidX Security Labs. All content for educational and ethical purposes only.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script src="js/terminal.js"></script>
+    <script>
+        // Dashboard functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update user info display
+            if (currentUser && currentUser.profile) {
+                document.querySelectorAll('.user-email').forEach(el => {
+                    el.textContent = currentUser.email;
+                });
+                
+                document.querySelectorAll('.user-role').forEach(el => {
+                    el.textContent = currentUser.profile.role || 'free';
+                });
+                
+                document.getElementById('subscription-status').textContent = currentUser.profile.role || 'Free';
+                document.getElementById('member-since').textContent = new Date(currentUser.profile.created_at).toLocaleDateString();
+            }
+            
+            // Terminal functionality for dashboard
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+            
+            // Add dashboard-specific commands to the terminal
+            if (window.terminal) {
+                // Extend the terminal commands
+                Object.assign(window.terminal.commands, {
+                    dashboard: window.terminal.help.bind(window.terminal),
+                    profile: function() {
+                        if (currentUser) {
+                            window.terminal.println(`<span class="terminal-text">Email: ${currentUser.email}</span>`);
+                            window.terminal.println(`<span class="terminal-text">Role: ${currentUser.profile.role || 'free'}</span>`);
+                            window.terminal.println(`<span class="terminal-text">Member since: ${new Date(currentUser.profile.created_at).toLocaleDateString()}</span>`);
+                        } else {
+                            window.terminal.println(`<span class="terminal-text">Not logged in</span>`);
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
