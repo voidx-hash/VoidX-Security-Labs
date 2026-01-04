@@ -209,5 +209,12 @@ function hasAccess(requiredRole) {
   return hasRole(requiredRole);
 }
 
+// Make functions available globally
+window.login = login;
+window.register = register;
+window.logout = logout;
+window.hasRole = hasRole;
+window.hasAccess = hasAccess;
+
 // Initialize auth when DOM is loaded
 document.addEventListener('DOMContentLoaded', initAuth);
