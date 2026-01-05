@@ -1,10 +1,6 @@
 // Supabase authentication and user management
-const SUPABASE_URL = "https://dwhnjikownwksbamdqdm.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_su8HLqGi3osha9PRyaXsmQ_glK4-JoQ";
-
-// Initialize Supabase client
-const { createClient } = supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = 'https://dwhnjikownwksbamdqdm.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3aG5qaWtvd253a3NiYW1kcWRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MjQ3ODEsImV4cCI6MjA4MzEwMDc4MX0.nKIUy3o5DICVmpk6UQYwV3KZ9HYsngf1utHSBMBQtGw';
 
 // User roles
 const USER_ROLES = {
@@ -48,7 +44,7 @@ async function initAuth() {
 
 // Load user profile from database
 async function loadUserProfile() {
-  if (!currentUser) return;
+  if (!currentUser || !supabase) return;
   
   // Get user profile
   let { data: profile, error: profileError } = await supabase
@@ -96,7 +92,7 @@ async function loadUserProfile() {
 
 // Create user profile in database
 async function createUserProfile() {
-  if (!currentUser) return;
+  if (!currentUser || !supabase) return;
   
   const { error } = await supabase
     .from('users')
@@ -137,6 +133,10 @@ function updateUIForGuest() {
 
 // Login function
 async function login(email, password) {
+  if (!supabase) {
+    throw new Error('Supabase not initialized');
+  }
+  
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password
@@ -149,6 +149,10 @@ async function login(email, password) {
 
 // Register function
 async function register(email, password, username) {
+  if (!supabase) {
+    throw new Error('Supabase not initialized');
+  }
+  
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -185,6 +189,12 @@ async function register(email, password, username) {
 
 // Logout function
 async function logout() {
+  if (!supabase) {
+    console.error('Supabase not initialized');
+    window.location.href = 'index.html';
+    return;
+  }
+  
   const { error } = await supabase.auth.signOut();
   if (error) {
     console.error('Error logging out:', error);
@@ -209,12 +219,38 @@ function hasAccess(requiredRole) {
   return hasRole(requiredRole);
 }
 
-// Make functions available globally
-window.login = login;
-window.register = register;
-window.logout = logout;
-window.hasRole = hasRole;
-window.hasAccess = hasAccess;
+// Initialize Supabase client
+let supabase;
 
-// Initialize auth when DOM is loaded
-document.addEventListener('DOMContentLoaded', initAuth);
+// Function to initialize Supabase when the library is available
+function initializeSupabase() {
+  if (typeof window.supabase !== 'undefined' && window.supabase) {
+    const { createClient } = window.supabase;
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Initialize auth when Supabase is available
+    initAuth();
+    
+    // Make functions available globally
+    window.login = login;
+    window.register = register;
+    window.logout = logout;
+    window.hasRole = hasRole;
+    window.hasAccess = hasAccess;
+    
+    return true;
+  }
+  return false;
+}
+
+// Try to initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  if (!initializeSupabase()) {
+    // If Supabase is not available immediately, wait a bit and try again
+    setTimeout(() => {
+      if (!initializeSupabase()) {
+        console.error('Supabase library not available');
+      }
+    }, 100);
+  }
+});
