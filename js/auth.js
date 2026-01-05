@@ -16,6 +16,11 @@ let currentUser = null;
 
 // Initialize authentication
 async function initAuth() {
+  if (!supabase) {
+    console.error('Supabase not initialized');
+    return;
+  }
+  
   // Check if user is already logged in
   const { data: { session }, error } = await supabase.auth.getSession();
   
@@ -254,3 +259,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
   }
 });
+
+// Make functions available globally after Supabase is initialized
+function assignGlobalFunctions() {
+  window.login = login;
+  window.register = register;
+  window.logout = logout;
+  window.hasRole = hasRole;
+  window.hasAccess = hasAccess;
+}
+
+// Try to assign global functions immediately, and again when Supabase is initialized
+assignGlobalFunctions();
