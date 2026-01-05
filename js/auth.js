@@ -1,15 +1,8 @@
 // Supabase authentication and user management
-<<<<<<< HEAD
-const SUPABASE_URL = 'https://dwhnjikownwksbamdqdm.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3aG5qaWtvd253a3NiYW1kcWRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MjQ3ODEsImV4cCI6MjA4MzEwMDc4MX0.nKIUy3o5DICVmpk6UQYwV3KZ9HYsngf1utHSBMBQtGw';
-=======
-const SUPABASE_URL = "https://dwhnjikownwksbamdqdm.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3aG5qaWtvd253a3NiYW1kcWRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MjQ3ODEsImV4cCI6MjA4MzEwMDc4MX0.nKIUy3o5DICVmpk6UQYwV3KZ9HYsngf1utHSBMBQtGw";
 
-// Initialize Supabase client
-const { createClient } = supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
->>>>>>> 331c1e63b11df523e5604e0b0b61ef041d1fcc4a
+// NOTE: Storing keys in source is not recommended. Move these to env/config and rotate the key if it was committed.
+const SUPABASE_URL = 'https://dwhnjikownwksbamdqdm.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3aG5qaWtvd253a3NiYW1kcWRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MjQ3ODEsImV4cCI6MjA4MzEwMDc4MX0.nKIUy3o5[...]';
 
 // User roles
 const USER_ROLES = {
@@ -23,6 +16,9 @@ const USER_ROLES = {
 // Current user state
 let currentUser = null;
 
+// Supabase client (initialized when library available)
+let supabase = null;
+
 // Initialize authentication
 async function initAuth() {
   if (!supabase) {
@@ -31,12 +27,20 @@ async function initAuth() {
   }
   
   // Check if user is already logged in
-  const { data: { session }, error } = await supabase.auth.getSession();
-  
-  if (session) {
-    currentUser = session.user;
-    await loadUserProfile();
-    updateUIForUser();
+  try {
+    const { data: { session } = {}, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error('Error getting session:', error);
+    }
+
+    if (session) {
+      currentUser = session.user;
+      await loadUserProfile();
+      updateUIForUser();
+    }
+  } catch (err) {
+    console.error('initAuth error:', err);
+    return;
   }
   
   // Listen for auth changes
@@ -115,7 +119,7 @@ async function createUserProfile() {
       email: currentUser.email,
       username: currentUser.email.split('@')[0], // Default username
       role: USER_ROLES.FREE,
-      created_at: new Date()
+      created_at: new Date().toISOString()
     }]);
   
   if (error) {
@@ -135,7 +139,7 @@ function updateUIForUser() {
     });
     
     document.querySelectorAll('.user-role').forEach(el => {
-      el.textContent = currentUser.profile.role || 'free';
+      el.textContent = currentUser.profile.role || USER_ROLES.FREE;
     });
   }
 }
@@ -182,7 +186,7 @@ async function register(email, password, username) {
   }
   
   // Create user profile
-  if (data.user) {
+  if (data && data.user) {
     const { error: profileError } = await supabase
       .from('users')
       .insert([{
@@ -190,7 +194,7 @@ async function register(email, password, username) {
         email: data.user.email,
         username: username,
         role: USER_ROLES.FREE,
-        created_at: new Date()
+        created_at: new Date().toISOString()
       }]);
     
     if (profileError) {
@@ -233,14 +237,17 @@ function hasAccess(requiredRole) {
   return hasRole(requiredRole);
 }
 
-// Initialize Supabase client
-let supabase;
-
 // Function to initialize Supabase when the library is available
 function initializeSupabase() {
   if (typeof window.supabase !== 'undefined' && window.supabase) {
-    const { createClient } = window.supabase;
-    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // The loaded script should provide a createClient function or you may import createClient from @supabase/supabase-js
+    if (typeof window.supabase.createClient === 'function') {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else {
+      // If you instead load @supabase/supabase-js as a module and expose createClient globally, adjust accordingly
+      console.error('Supabase library loaded but createClient not found on window.supabase');
+      return false;
+    }
     
     // Initialize auth when Supabase is available
     initAuth();
@@ -268,15 +275,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
   }
 });
-
-// Make functions available globally after Supabase is initialized
-function assignGlobalFunctions() {
-  window.login = login;
-  window.register = register;
-  window.logout = logout;
-  window.hasRole = hasRole;
-  window.hasAccess = hasAccess;
-}
-
-// Try to assign global functions immediately, and again when Supabase is initialized
-assignGlobalFunctions();
